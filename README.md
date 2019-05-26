@@ -1,5 +1,7 @@
 # xprintf
 
+[![Build Status](https://travis-ci.org/rafagafe/xprintf.svg?branch=master)](https://travis-ci.org/rafagafe/xprintf)
+
 The xprintf module is an alternative implementation of the printf family of the standard library of C.
 
 The main feature of xprintf is that it lets you __print in user defined output stream__. In this way the user can print directly on a serial port or on an RTOS queue.
