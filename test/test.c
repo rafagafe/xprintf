@@ -34,7 +34,7 @@
 
 #include "../xprintf.h"
 
-static int check( int len1, char const* str1, int len2, char const* str2 ) {
+static int check( int len1, char const* str1, int len2, char const* str2, int size ) {
     enum { margin = 15 };
     if ( len1 != len2 ) {
         puts( "FAILED" );
@@ -48,6 +48,12 @@ static int check( int len1, char const* str1, int len2, char const* str2 ) {
         printf( "%*s'%s'\n\n", margin, "-String 2:", str2 );
         return -2;        
     }
+    if ( 0 != memcmp( str1, str2, size ) ) {
+        puts( "FAILED" );
+        printf( "%*s'%.*s'\n",   margin, "-Padding 1:", size - len1 - 1, str1 + len1 + 1 );
+        printf( "%*s'%.*s'\n\n", margin, "-Padding 2:", size - len2 - 1, str2 + len2 + 1 );
+        return -3;        
+    }    
     puts( "PASSED" );
     return 0;
 }
@@ -69,8 +75,8 @@ int main( void ) {
         putc( '-', stdout );
     putc('\n', stdout );
 
-    char str1[ 256 ];
-    char str2[ 256 ];
+    char str1[ 128 ];
+    char str2[ sizeof str1 ];
 
     {
         static char const* const data [] = { "abcdefg" };
@@ -84,7 +90,7 @@ int main( void ) {
                 printf( "%*s%*s", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -103,7 +109,7 @@ int main( void ) {
                 printf( "%*s%+*d", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -122,7 +128,7 @@ int main( void ) {
                 printf( "%*s%+*ld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -141,7 +147,7 @@ int main( void ) {
                 printf( "%*s%+*lld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -160,7 +166,7 @@ int main( void ) {
                 printf( "%*s%*u", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -179,7 +185,7 @@ int main( void ) {
                 printf( "%*s%*u", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -198,7 +204,7 @@ int main( void ) {
                 printf( "%*s%*lu", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -217,7 +223,7 @@ int main( void ) {
                 printf( "%*s%*llu", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -236,7 +242,7 @@ int main( void ) {
                 printf( "%*s%*c", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
-                int err = check( len1, str1, len2, str2 );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
                 passed += 0 == err;
                 ++total;
             }
@@ -253,7 +259,7 @@ int main( void ) {
             printf( "%*s%*.*s", wfmt, fmt[i], wval, arraylen, array );
             int len1 =  sprintf( str1, fmt[i], arraylen, array );
             int len2 = xsprintf( str2, fmt[i], arraylen, array );
-            int err = check( len1, str1, len2, str2 );
+            int err = check( len1, str1, len2, str2, sizeof str1 );
             passed += 0 == err;
             ++total;
         }
