@@ -91,15 +91,18 @@ static int getnum( int* dest, char const* fmt ) {
   * @param va   
   * @param fmt Format string.
   * @return num bytes read from format string. */
-static int getval( int* dest, va_list va, char const* src ) {    
-    if ( isdigit( (unsigned char)*src ) )
-        return getnum( dest, src );        
-    if ( '*' == *src ) {
-        *dest = va_arg( va, int );
-        return 1;
-    }
-    return 0;
-}
+#define getval( dest, va, src ) ({\
+    int rslt = 0;\
+    if ( isdigit( (unsigned char)*src ) )\
+        rslt = getnum( dest, src );\
+    else if ( '*' == *src ) {\
+        *dest = va_arg( va, int );\
+        rslt = 1;\
+    }\
+    else \
+        rslt = 0;\
+    rslt;\
+})
 
 /** Reverse a string.
   * @param str String to be reversed.
@@ -394,6 +397,8 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                 int vallen;
                 if ( 's' == code ) {
                     val = va_arg( va, char* );  
+                    if ( NULL == val )
+                        val = "(null)";
                     vallen = strlen( val );
                 }
                 else {
