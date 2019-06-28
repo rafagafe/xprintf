@@ -108,7 +108,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%-*s%+*d", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%-*d", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -127,7 +127,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%-*s%+*ld", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%-*ld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -146,7 +146,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%-*s%+*lld", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%-*lld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -165,7 +165,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%-*s%*u", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%-*u", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
