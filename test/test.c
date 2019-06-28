@@ -40,6 +40,8 @@ static int check( int len1, char const* str1, int len2, char const* str2, int si
         puts( "FAILED" );
         printf( "%*s'%d'\n",   margin, "-Len 1:", len1 );
         printf( "%*s'%d'\n\n", margin, "-Len 2:", len2 );
+        printf( "%*s'%.*s'\n",   margin, "-String 1:", len1, str1 );
+        printf( "%*s'%.*s'\n\n", margin, "-String 2:", len2, str2 );         
         return -1;
     }
     if ( 0 != strcmp( str1, str2 ) ) {
@@ -62,16 +64,16 @@ int main( void ) {
 
     enum {
         verbose = 0,
-        wval = -16,
-        wfmt = -10,
-        wrslt = -8
+        wval    = 16,
+        wfmt    = 10,
+        wrslt   = 8
     };
 
     int total = 0;
     int passed = 0;
     
     printf( "\n%*s%*s%s\n", wfmt, "Format", wval, "Value", "Result" );
-    for( int i = 0; i < -wfmt -wval -wrslt; ++i )
+    for( int i = 0; i < wfmt + wval + wrslt; ++i )
         putc( '-', stdout );
     putc('\n', stdout );
 
@@ -87,7 +89,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*s", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%-*s", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -106,7 +108,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%+*d", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%+*d", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -125,7 +127,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%+*ld", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%+*ld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -144,7 +146,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%+*lld", wfmt, fmt[i], wval, data[j] );          
+                printf( "%-*s%+*lld", wfmt, fmt[i], wval, data[j] );          
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -163,7 +165,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*u", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%*u", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -174,7 +176,7 @@ int main( void ) {
     }     
 
     {
-        static unsigned int const data [] = { 12345, 0, 98 };
+        static unsigned int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
             "%X", "%x", "%#x", "%7x", "%07x", "%-7x", "%+x", "%.4x", "%.4x", "%+5.4x"           
         };
@@ -182,7 +184,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*u", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%-*u", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -193,15 +195,15 @@ int main( void ) {
     }
 
     {
-        static unsigned long int const data [] = { 12345, 0, 98 };
+        static unsigned long int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
-            "%lX", "%lx", "%#x", "%7lx", "%07lx", "%-7lx", "%+lx", "%.4lx", "%.4lx", "%+5.4lx"           
-        };
+            "%lX", "%lx", /* "%#lx", */ "%7lx", "%07lx", "%-7lx", "%+lx", "%.4lx", "%.4lx", "%+5.4lx"           
+        };                // The format "%#lx" does not work properly in gcc 7.3.0        
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*lu", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%-*lu", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -212,15 +214,15 @@ int main( void ) {
     }         
 
     {
-        static unsigned long long int const data [] = { 12345, 0, 98 };
+        static unsigned long long int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
-            "%llX", "%llx", "%#x", "%7llx", "%07llx", "%-7llx", "%+llx", "%.4llx", "%.4llx", "%+5.4llx"           
-        };
+            "%llX", "%llx", /* "%#llx", */ "%7llx", "%07llx", "%-7llx", "%+llx", "%.4llx", "%.4llx", "%+5.4llx"           
+        };                  // The format "%#llx" does not work properly in gcc 7.3.0
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*llu", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%-*llu", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -239,7 +241,7 @@ int main( void ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
                 memset( str2, 'R', sizeof str2 );
-                printf( "%*s%*c", wfmt, fmt[i], wval, data[j] );
+                printf( "%-*s%-*c", wfmt, fmt[i], wval, data[j] );
                 int len1 =  sprintf( str1, fmt[i], data[j] );
                 int len2 = xsprintf( str2, fmt[i], data[j] );
                 int err = check( len1, str1, len2, str2, sizeof str1 );
@@ -256,7 +258,7 @@ int main( void ) {
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             memset( str1, 'R', sizeof str1 );
             memset( str2, 'R', sizeof str2 );   
-            printf( "%*s%*.*s", wfmt, fmt[i], wval, arraylen, array );
+            printf( "%-*s%-*.*s", wfmt, fmt[i], wval, arraylen, array );
             int len1 =  sprintf( str1, fmt[i], arraylen, array );
             int len2 = xsprintf( str2, fmt[i], arraylen, array );
             int err = check( len1, str1, len2, str2, sizeof str1 );
