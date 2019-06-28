@@ -72,7 +72,7 @@ int main( void ) {
     int total = 0;
     int passed = 0;
     
-    printf( "\n%*s%*s%s\n", wfmt, "Format", wval, "Value", "Result" );
+    printf( "\n%-*s%-*s%s\n", wfmt, "Format", wval, "Value", "Result" );
     for( int i = 0; i < wfmt + wval + wrslt; ++i )
         putc( '-', stdout );
     putc('\n', stdout );
