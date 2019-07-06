@@ -304,7 +304,24 @@ int main( void ) {
             ++total;
         }
     }
-
+    {
+        static void* const data [] = { (void*)12345, (void*)0, (void*)98, (void*)1 };
+        static char const* const fmt [] = {
+            "%p"
+        };
+        for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
+            for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
+                memset( str1, 'R', sizeof str1 );
+                memset( str2, 'R', sizeof str2 );
+                printf( "%-*s%-*p", wfmt, fmt[i], wval, data[j] );
+                int len1 =  sprintf( str1, fmt[i], data[j] );
+                int len2 = xsprintf( str2, fmt[i], data[j] );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
+                passed += 0 == err;
+                ++total;
+            }
+        }
+    }
 
     printf( "\nTest passed: [ %d / %d ]\n", passed, total );    
     int failed = total - passed;

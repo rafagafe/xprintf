@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdint.h>
 
 #ifdef XPRINTF_DISABLE_WIDTH
 enum { diswidth = 1 };
@@ -366,6 +367,26 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                 }
                 break;
             }
+            case 'p': {
+                uintptr_t val = (uintptr_t)va_arg( va, void* );
+                if ( 0 != val /*&& '#' == flag*/ ) {
+                    ostrm( o, "0x", 2 );
+                    rslt += 2;
+                }
+                char const* ptr;
+                int len;
+                if ( 0 != val ) {
+                     ptr = buff;
+                     len = x2a( buff, val, 0 );
+                }
+                else {
+                    static char const nullval[] = "(nil)";
+                    ptr = nullval;                    
+                    len = sizeof nullval - 1;
+                }                
+                rslt += sendnum( o, ptr, len, width, flag, precision );
+                break;
+            }            
             case 'x':
             case 'X': {
                 unsigned int val = va_arg( va, unsigned int );
