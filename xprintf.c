@@ -31,28 +31,18 @@
 #include <assert.h>
 #include <stdint.h>
 
-#ifdef XPRINTF_DISABLE_WIDTH
-enum { diswidth = 1 };
+#ifdef USE_XPRNTF_CFG
+#include "xprintf-cfg.h"
 #else
-enum { diswidth = 0 };
-#endif
-
-#ifdef XPRINTF_DISABLE_PRECISION
-enum { disprec = 1 };
-#else
-enum { disprec = 0 };
-#endif
-
-#ifdef XPRINTF_DISABLE_LONG
-enum { dislong = 1 };
-#else 
-enum { dislong = 0 };    
-#endif
-
-#ifdef XPRINTF_DISABLE_LONG_LONG
-enum { dislonglong = 1 };
-#else 
-enum { dislonglong = 0 };    
+enum {
+    diswidth = 0,
+    disprec  = 0,
+    disu     = 0,
+    disd     = 0,
+    disx     = 0,
+    disl     = 0,
+    disll    = 0    
+};
 #endif
 
 /** Get flag from format string.
@@ -259,6 +249,33 @@ static int sendnum( struct ostrm const* obj, char const* buff, int len, int widt
     return rslt;
 }
 
+/* Header compare */
+static int hdrcmp( char const* header, char const* str ) {
+    int len;
+    for( len = 0; '\0' != *header; ++len, ++str, ++header )
+        if ( *header != *str )
+            return 0;
+    return len;
+}
+
+enum argtype { none, l, ll };
+
+enum argtype gettype( char const** fmt ) {    
+    static struct { char const* token; enum argtype type; } const lut [] = {
+        { "ll", ll },
+        { "l",  l  }
+    };
+    for( int i = 0; i < sizeof lut / sizeof *lut; ++i ) {
+        int len = hdrcmp( lut[i].token, *fmt );
+        if ( len ) {
+            *fmt += len;
+            return lut[i].type;
+        }
+    }
+    return none;
+}
+
+
 /* Print formatted data to a user defined stream. */
 int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {    
     
@@ -293,92 +310,108 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
             fmt += getval( &precision, va, fmt );                 
         }
         if ( disprec )
-            precision = INT_MAX;
-        
-        int const code = *fmt++;        
-        switch( code ) {
+            precision = INT_MAX;               
+
+        enum argtype const type = gettype( &fmt );
+        int const specifier = *fmt++;
+        switch( specifier ) {
             case '\0':
                 return rslt;            
-            case '%': {
+            case '%':
                 ostrmch( o, '%' );
                 ++rslt;
                 break;
-            }
-            case 'l': {
-                int const type = *fmt++;
-                if ( '\0' == type )
+            case 'u': {
+                if ( disu )
                     return rslt;
-                if ( dislong ) {
-                    va_arg( va, unsigned long int );
-                    break;
-                }
+                int len;
                 switch( type ) {
-                    case 'x':
-                    case 'X': {
+                    case none: {
+                        unsigned int val = va_arg( va, unsigned int );
+                        len = u2a( buff, val );                        
+                        break;
+                    }
+                    case l: {
+                        if ( disl )
+                            return rslt;
                         unsigned long int val = va_arg( va, unsigned long int );
-                        int const upper = 'X' == type;
-                        int const len   = x2a( buff, val, upper );
-                        int const base  = '#' == flag ? type : '\0'; 
-                        rslt += sendnum( o, buff, len, width, flag, precision, base );
+                        len = u2a( buff, val );                        
                         break;
                     }
-                    case 'u': {
-                        unsigned long int val = va_arg( va, unsigned long int );
-                        int const len = u2a( buff, val );
-                        rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
+                    case ll: {
+                        if ( disll )
+                            return rslt;
+                        unsigned long long int val = va_arg( va, unsigned long long int );
+                        len = u2a( buff, val );                        
                         break;
                     }
-                    case 'i':
-                    case 'd': {
-                        signed long int val = va_arg( va, signed long int );
-                        int const len = i2a( buff, val, '+' == flag );
-                        rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
-                        break;
-                    }
-                    case 'l': {
-                        int const type = *fmt++;   
-                        if ( '\0' == type )
-                            return rslt;                        
-                        if ( dislonglong ) {                          
-                            va_arg( va, unsigned long long int );
-                            break;          
-                        }              
-                        switch( type ) {
-                            case '\0':
-                                return rslt;  
-                            case 'x':
-                            case 'X': {                                
-                                unsigned long long int val = va_arg( va, unsigned long long int );
-                                int const upper = 'X' == type;
-                                int const len   = x2a( buff, val, upper );
-                                int const base  = '#' == flag ? type : '\0'; 
-                                rslt += sendnum( o, buff, len, width, flag, precision, base );
-                                break;
-                            }
-                            case 'u': {                                
-                                unsigned long long int val = va_arg( va, unsigned long long int );
-                                int const len = u2a( buff, val );
-                                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
-                                break;
-                            }
-                            case 'i':
-                            case 'd': {
-                                signed long long int val = va_arg( va, signed long long int );
-                                int const len = i2a( buff, val, '+' == flag );
-                                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
-                                break;
-                            }
-                            default:
-                                break;                            
-                        }
-                        break;
-                    }
-                    default:
-                        break;                    
                 }
+                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                 break;
             }
+            case 'i':
+            case 'd': {
+                if ( disd )
+                    return rslt;                
+                int len;
+                switch( type ) {
+                    case none: {
+                        int val = va_arg( va, int );
+                        len = i2a( buff, val, '+' == flag );
+                        break;
+                    }
+                    case l: {
+                        if ( disl )
+                            return rslt;
+                        long int val = va_arg( va, long int );
+                        len = i2a( buff, val, '+' == flag );
+                        break;
+                    }
+                    case ll: {
+                        if ( disll )
+                            return rslt;
+                        long long int val = va_arg( va, long long int );
+                        len = i2a( buff, val, '+' == flag );
+                        break;
+                    }
+                }
+                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );                
+                break;
+            }
+            case 'x':
+            case 'X': {
+                if ( disx )
+                    return rslt;                
+                int const upper = 'X' == specifier;
+                int len;
+                switch( type ) {
+                    case none: {
+                        unsigned int val = va_arg( va, unsigned int );
+                        len = x2a( buff, val, upper );
+                        break;
+                    }
+                    case l: {
+                        if ( disl )
+                            return rslt;
+                        unsigned long int val = va_arg( va, unsigned long int );
+                        len = x2a( buff, val, upper );
+                        break;
+                    }
+                    case ll: {
+                        if ( disll )
+                            return rslt;
+                        unsigned long long int val = va_arg( va, unsigned long long int );
+                        len = x2a( buff, val, upper );
+                        break;
+                    }
+                }
+                int const base  = '#' == flag ? specifier : '\0'; 
+                rslt += sendnum( o, buff, len, width, flag, precision, base );
+                break;
+            }  
             case 'p': {
+                if ( disx )
+                    return rslt;                
                 uintptr_t val = (uintptr_t)va_arg( va, void* );
                 char const* ptr;
                 int len;
@@ -398,35 +431,13 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                 }                                                
                 rslt += sendnum( o, ptr, len, width, flag, precision, base );
                 break;
-            }            
-            case 'x':
-            case 'X': {
-                unsigned int val = va_arg( va, unsigned int );
-                int const upper  = 'X' == code;
-                int const len    = x2a( buff, val, upper );
-                int const base   = '#' == flag ? code : '\0'; 
-                rslt += sendnum( o, buff, len, width, flag, precision, base );
-                break;
-            }
-            case 'u': {
-                unsigned int val = va_arg( va, unsigned int );
-                int const len = u2a( buff, val );
-                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
-                break;
-            }
-            case 'i':
-            case 'd': {
-                int val = va_arg( va, int );
-                int const len = i2a( buff, val, '+' == flag );
-                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );                
-                break;
-            }
+            }                                       
             case 'c':
             case 's': {
                 char tmp;
                 char const* val;  
                 int vallen;
-                if ( 's' == code ) {
+                if ( 's' == specifier ) {
                     val = va_arg( va, char* );  
                     if ( NULL == val )
                         val = "(null)";
@@ -453,9 +464,9 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                     rslt += diff;
                 }
                 break;
-            }            
+            }
             default:
-                break;
+                return rslt;                            
         }
     }
     return rslt;
