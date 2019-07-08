@@ -1,6 +1,6 @@
 # xprintf
 
-[![Build Status](https://travis-ci.org/rafagafe/xprintf.svg?branch=master)](https://travis-ci.org/rafagafe/xprintf)
+[![Build Status](https://travis-ci.org/rafagafe/xprintf.svg?branch=master)](https://travis-ci.org/rafagafe/xprintf) [![Donate using PayPal](https://img.shields.io/badge/donate-PayPal-orange.svg)](https://paypal.me/rafagafe)
 
 The xprintf module is an alternative implementation of the printf family of the standard library of C.
 
