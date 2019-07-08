@@ -345,6 +345,8 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                         len = u2a( buff, val );                        
                         break;
                     }
+                    default:
+                        return rslt;
                 }
                 rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                 break;
@@ -374,6 +376,8 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                         len = i2a( buff, val, '+' == flag );
                         break;
                     }
+                    default:
+                        return rslt;
                 }
                 rslt += sendnum( o, buff, len, width, flag, precision, '\0' );                
                 break;
@@ -404,6 +408,8 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                         len = x2a( buff, val, upper );
                         break;
                     }
+                    default:
+                        return rslt;
                 }
                 int const base  = '#' == flag ? specifier : '\0'; 
                 rslt += sendnum( o, buff, len, width, flag, precision, base );

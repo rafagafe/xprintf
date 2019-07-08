@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -g -O3 -std=gnu99 -Wall
+CFLAGS = -g -O2 -std=gnu99 -Wall
 
 src  = $(wildcard *.c)
 src += $(wildcard ../*.c)
