@@ -119,6 +119,25 @@ int main( void ) {
     }
 
     {
+        static size_t const data [] = { 12345, 0, 98 };
+        static char const* const fmt [] = {
+            "%zd", "%7zd", "%07zd", "%-7zd", "%+zd", "%.4zd", "%.4zd", "%+5.4zd"
+        };
+        for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
+            for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
+                memset( str1, 'R', sizeof str1 );
+                memset( str2, 'R', sizeof str2 );
+                printf( "%-*s%-*ld", wfmt, fmt[i], wval, data[j] );          
+                int len1 =  sprintf( str1, fmt[i], data[j] );
+                int len2 = xsprintf( str2, fmt[i], data[j] );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
+                passed += 0 == err;
+                ++total;
+            }
+        }
+    }
+
+    {
         static long int const data [] = { -12345, 12345, 0, 98, -98 };
         static char const* const fmt [] = {
             "%ld", "%7ld", "%07ld", "%-7ld", "%+ld", "%.4ld", "%.4ld", "%+5.4ld"
@@ -176,6 +195,25 @@ int main( void ) {
     }     
 
     {
+        static size_t const data [] = { 12345, 0, 98 };
+        static char const* const fmt [] = {
+            "%zu", "%7zu", "%07zu", "%-7zu", "%+zu", "%.4zu", "%.4zu", "%+5.4zu"           
+        };
+        for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
+            for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
+                memset( str1, 'R', sizeof str1 );
+                memset( str2, 'R', sizeof str2 );
+                printf( "%-*s%-*lu", wfmt, fmt[i], wval, data[j] );
+                int len1 =  sprintf( str1, fmt[i], data[j] );
+                int len2 = xsprintf( str2, fmt[i], data[j] );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
+                passed += 0 == err;
+                ++total;
+            }
+        }
+    }
+
+    {
         static unsigned long int const data [] = { 12345, 0, 98 };
         static char const* const fmt [] = {
             "%lu", "%7lu", "%07lu", "%-7lu", "%+lu", "%.4lu", "%.4lu", "%+5.4lu"           
@@ -231,6 +269,25 @@ int main( void ) {
             }
         }
     }
+
+    {
+        static size_t const data [] = { 12345, 0, 98, 1 };
+        static char const* const fmt [] = {
+            "%zX", "%zx", "%#zx", "%7zx", "%07zx", "%-7zx", "%+zx", "%.4zx", "%.4zx", "%+5.4zx" 
+        };                
+        for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
+            for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
+                memset( str1, 'R', sizeof str1 );
+                memset( str2, 'R', sizeof str2 );
+                printf( "%-*s%-*lu", wfmt, fmt[i], wval, data[j] );
+                int len1 =  sprintf( str1, fmt[i], data[j] );
+                int len2 = xsprintf( str2, fmt[i], data[j] );
+                int err = check( len1, str1, len2, str2, sizeof str1 );
+                passed += 0 == err;
+                ++total;
+            }
+        }
+    }         
 
     {
         static unsigned long int const data [] = { 12345, 0, 98, 1 };

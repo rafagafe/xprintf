@@ -40,6 +40,7 @@ enum {
     disu     = 0,
     disd     = 0,
     disx     = 0,
+    disz     = 0,
     disl     = 0,
     disll    = 0    
 };
@@ -258,12 +259,13 @@ static int hdrcmp( char const* header, char const* str ) {
     return len;
 }
 
-enum argtype { none, l, ll };
+enum argtype { none, l, ll, z };
 
 enum argtype gettype( char const** fmt ) {    
     static struct { char const* token; enum argtype type; } const lut [] = {
         { "ll", ll },
-        { "l",  l  }
+        { "l",  l  },
+        { "z",  z  }
     };
     for( int i = 0; i < sizeof lut / sizeof *lut; ++i ) {
         int len = hdrcmp( lut[i].token, *fmt );
@@ -331,6 +333,13 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                         len = u2a( buff, val );                        
                         break;
                     }
+                    case z: {
+                        if ( disz )
+                            return rslt;
+                        size_t val = va_arg( va, size_t );
+                        len = u2a( buff, val );                        
+                        break;
+                    }
                     case l: {
                         if ( disl )
                             return rslt;
@@ -359,6 +368,13 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                 switch( type ) {
                     case none: {
                         int val = va_arg( va, int );
+                        len = i2a( buff, val, '+' == flag );
+                        break;
+                    }
+                    case z: {
+                        if ( disz )
+                            return rslt;
+                        size_t val = va_arg( va, size_t );
                         len = i2a( buff, val, '+' == flag );
                         break;
                     }
@@ -391,6 +407,13 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                 switch( type ) {
                     case none: {
                         unsigned int val = va_arg( va, unsigned int );
+                        len = x2a( buff, val, upper );
+                        break;
+                    }
+                    case z: {
+                        if ( disz )
+                            return rslt;
+                        size_t val = va_arg( va, size_t );
                         len = x2a( buff, val, upper );
                         break;
                     }
