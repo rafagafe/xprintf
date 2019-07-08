@@ -61,7 +61,7 @@ int qprintf( struct queue* queue, char const* fmt, ... ) {
     va_start( va, fmt );
     int const rslt = xvprintf( &ostrm, fmt, va );
     va_end( va );
-    return rslt;    
+    return rslt;
 }
 
 ```

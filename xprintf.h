@@ -1,7 +1,7 @@
 
 /*
 <https://github.com/rafagafe/xprintf>
-     
+
   Licensed under the MIT License <http://opensource.org/licenses/MIT>.
   SPDX-License-Identifier: MIT
   Copyright (c) 2016-2018 Rafa Garcia <rafagarcia77@gmail.com>.
@@ -20,7 +20,7 @@
   LIABILITY, WHETHER IN AN ACTION OF  CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE  OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
-    
+
 */
 
 #ifndef XPRINTF_H
