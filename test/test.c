@@ -216,7 +216,7 @@ int main( void ) {
     {
         static unsigned int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
-            "%X", "%x", "%#x", "%7x", "%07x", "%-7x", "%+x", "%.4x", "%.4x", "%+5.4x"           
+            "%X", "%x", "%#x", "%7x", "%#7x", "%07x", "%-7x", "%+x", "%.4x", "%.4x", "%+5.4x"           
         };
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
@@ -235,8 +235,8 @@ int main( void ) {
     {
         static unsigned long int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
-            "%lX", "%lx", /* "%#lx", */ "%7lx", "%07lx", "%-7lx", "%+lx", "%.4lx", "%.4lx", "%+5.4lx"           
-        };                // The format "%#lx" does not work properly in gcc 7.3.0        
+            "%lX", "%lx", "%#lx", "%7lx", "%07lx", "%-7lx", "%+lx", "%.4lx", "%.4lx", "%+5.4lx"           
+        };                
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
@@ -254,8 +254,8 @@ int main( void ) {
     {
         static unsigned long long int const data [] = { 12345, 0, 98, 1 };
         static char const* const fmt [] = {
-            "%llX", "%llx", /* "%#llx", */ "%7llx", "%07llx", "%-7llx", "%+llx", "%.4llx", "%.4llx", "%+5.4llx"           
-        };                  // The format "%#llx" does not work properly in gcc 7.3.0
+            "%llX", "%llx", "%#llx", "%7llx", "%07llx", "%-7llx", "%+llx", "%.4llx", "%.4llx", "%+5.4llx"           
+        };
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {
                 memset( str1, 'R', sizeof str1 );
@@ -304,10 +304,11 @@ int main( void ) {
             ++total;
         }
     }
+    
     {
         static void* const data [] = { (void*)12345, (void*)0, (void*)98, (void*)1 };
         static char const* const fmt [] = {
-            "%p"
+            "%p", "%#p", "%7p", "%07p", "%-7p", "%.4p", "%.4p"
         };
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {

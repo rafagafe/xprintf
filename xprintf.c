@@ -216,15 +216,16 @@ static void ostrmchq( struct ostrm const* obj, unsigned char ch, int qty ) {
   * @param width Width got in the format string.   
   * @param flag  Flag got in the format string.
   * @param prec  Precision got in the format string. */
-static int sendnum( struct ostrm const* obj, char const* buff, int len, int width, int flag, int prec ) {
+static int sendnum( struct ostrm const* obj, char const* buff, int len, int width, int flag, int prec, char base ) {
 
     int rslt = 0;
 
     int const hassign       = '-' == *buff || '+' == *buff;
+    int const hasbase       = '\0' != base && '0' != *buff;
     int const numdigits     = len - hassign;
     int const hasprec       = INT_MAX != prec;
     int const zerosprec     = hasprec * ( max( numdigits, prec ) - numdigits );
-    int const totallen      = numdigits + zerosprec + hassign;
+    int const totallen      = numdigits + zerosprec + hassign + 2*hasbase;
     int const padding       = width > totallen ? width - totallen : 0;
     int const leftjust      = '-' == flag;
     int const zerospadding  = ( !hasprec && '0' == flag && !leftjust ) * padding;
@@ -234,6 +235,12 @@ static int sendnum( struct ostrm const* obj, char const* buff, int len, int widt
 
     ostrmchq( obj, ' ', leftpadding );   
     rslt += leftpadding;
+
+    if ( hasbase ) {                
+        ostrmch( obj, '0' );
+        ostrmch( obj, base );
+        rslt += 2;
+    }
 
     if ( hassign && 0 != numzeros ) {
         ostrmch( obj, *buff );
@@ -309,21 +316,23 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                     case 'x':
                     case 'X': {
                         unsigned long int val = va_arg( va, unsigned long int );
-                        int const len = x2a( buff, val, 'X' == type );
-                        rslt += sendnum( o, buff, len, width, flag, precision );
+                        int const upper = 'X' == type;
+                        int const len   = x2a( buff, val, upper );
+                        int const base  = '#' == flag ? type : '\0'; 
+                        rslt += sendnum( o, buff, len, width, flag, precision, base );
                         break;
                     }
                     case 'u': {
                         unsigned long int val = va_arg( va, unsigned long int );
                         int const len = u2a( buff, val );
-                        rslt += sendnum( o, buff, len, width, flag, precision );
+                        rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                         break;
                     }
                     case 'i':
                     case 'd': {
                         signed long int val = va_arg( va, signed long int );
                         int const len = i2a( buff, val, '+' == flag );
-                        rslt += sendnum( o, buff, len, width, flag, precision );
+                        rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                         break;
                     }
                     case 'l': {
@@ -340,21 +349,23 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                             case 'x':
                             case 'X': {                                
                                 unsigned long long int val = va_arg( va, unsigned long long int );
-                                int const len = x2a( buff, val, 'X' == type );
-                                rslt += sendnum( o, buff, len, width, flag, precision );
+                                int const upper = 'X' == type;
+                                int const len   = x2a( buff, val, upper );
+                                int const base  = '#' == flag ? type : '\0'; 
+                                rslt += sendnum( o, buff, len, width, flag, precision, base );
                                 break;
                             }
                             case 'u': {                                
                                 unsigned long long int val = va_arg( va, unsigned long long int );
                                 int const len = u2a( buff, val );
-                                rslt += sendnum( o, buff, len, width, flag, precision );
+                                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                                 break;
                             }
                             case 'i':
                             case 'd': {
                                 signed long long int val = va_arg( va, signed long long int );
                                 int const len = i2a( buff, val, '+' == flag );
-                                rslt += sendnum( o, buff, len, width, flag, precision );
+                                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                                 break;
                             }
                             default:
@@ -369,47 +380,45 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
             }
             case 'p': {
                 uintptr_t val = (uintptr_t)va_arg( va, void* );
-                if ( 0 != val /*&& '#' == flag*/ ) {
-                    ostrm( o, "0x", 2 );
-                    rslt += 2;
-                }
                 char const* ptr;
                 int len;
+                int base;
                 if ( 0 != val ) {
-                     ptr = buff;
-                     len = x2a( buff, val, 0 );
+                    ptr = buff;
+                    len = x2a( buff, val, 0 ); 
+                    base = 'x';                 
                 }
-                else {
+                else {                    
                     static char const nullval[] = "(nil)";
                     ptr = nullval;                    
                     len = sizeof nullval - 1;
-                }                
-                rslt += sendnum( o, ptr, len, width, flag, precision );
+                    base = '\0';
+                    if ( '0' == flag )
+                        flag = 'n';
+                }                                                
+                rslt += sendnum( o, ptr, len, width, flag, precision, base );
                 break;
             }            
             case 'x':
             case 'X': {
                 unsigned int val = va_arg( va, unsigned int );
-                int const upper = 'X' == code;
-                if ( 0 != val && '#' == flag ) {
-                    ostrm( o, upper ? "0X" : "0x", 2 );
-                    rslt += 2;
-                }
-                int const len = x2a( buff, val, upper );
-                rslt += sendnum( o, buff, len, width, flag, precision );
+                int const upper  = 'X' == code;
+                int const len    = x2a( buff, val, upper );
+                int const base   = '#' == flag ? code : '\0'; 
+                rslt += sendnum( o, buff, len, width, flag, precision, base );
                 break;
             }
             case 'u': {
                 unsigned int val = va_arg( va, unsigned int );
                 int const len = u2a( buff, val );
-                rslt += sendnum( o, buff, len, width, flag, precision );
+                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );
                 break;
             }
             case 'i':
             case 'd': {
                 int val = va_arg( va, int );
                 int const len = i2a( buff, val, '+' == flag );
-                rslt += sendnum( o, buff, len, width, flag, precision );                
+                rslt += sendnum( o, buff, len, width, flag, precision, '\0' );                
                 break;
             }
             case 'c':
