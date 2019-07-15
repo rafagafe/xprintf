@@ -42,7 +42,8 @@ enum {
     disx     = 0,
     disz     = 0,
     disl     = 0,
-    disll    = 0
+    disll    = 0,
+    disn     = 0
 };
 #endif
 
@@ -463,6 +464,14 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
                         flag = 'n';
                 }
                 rslt += sendnum( o, ptr, len, width, flag, precision, base );
+                break;
+            }
+            case 'n': {
+                if ( disn )
+                    return rslt;
+                int* val = va_arg( va, int* );
+                if ( NULL != val )
+                    *val = rslt;
                 break;
             }
             case 'c':

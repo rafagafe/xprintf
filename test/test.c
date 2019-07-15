@@ -100,6 +100,27 @@ int main( void ) {
     }
 
     {
+        memset( str1, 'R', sizeof str1 );
+        memset( str2, 'R', sizeof str2 );
+        static char const fmt [] = "Hi %s%n.";
+        static char const data [] = "Perry";
+        printf( "%-*s%-*s", wfmt, fmt, wval, data );
+        int n1 = -1;
+        int len1 =  sprintf( str1, fmt, data, &n1 );
+        int n2 = -1;
+        int len2 = xsprintf( str2, fmt, data, &n2 );
+        int err = 0;
+        if ( n1 != n2 || 0 > n1 ) {
+            puts( "FAILED" );
+            err = 1;
+        }
+        else
+            err = check( len1, str1, len2, str2, sizeof str1 );
+        passed += 0 == err;
+        ++total;
+    }
+
+    {
         static int const data [] = { -12345, 12345, 0, 98, -98 };
         static char const* const fmt [] = {
             "%d", "%7d", "%07d", "%-7d", "%+d", "%.4d", "%.4d", "%+5.4d"
