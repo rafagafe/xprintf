@@ -83,7 +83,7 @@ int main( void ) {
     {
         static char const* const data [] = { "abcdefg" };
         static char const* const fmt [] = {
-            "%s", "%10s", "%-10s", "%.2s", "%.10s", "%10.2s", "%10.2s"
+            "Text: %s", "%10s", "%-10s", "%.2s", "%.10s", "%10.2s", "%10.2s"
         };
         for( int i = 0; i < sizeof fmt / sizeof *fmt; ++i ) {
             for( int j = 0; j < sizeof data / sizeof *data; ++j ) {

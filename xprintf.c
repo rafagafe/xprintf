@@ -287,12 +287,16 @@ int xvprintf( struct ostrm const* o, char const* fmt, va_list va ) {
 
     while( '\0' != *fmt ) {
 
-        int const ch = *fmt++;
-        if( '%' != ch ) {
-            ostrmch( o, ch );
-            ++rslt;
+        if( '%' != *fmt ) {
+            int len = 0;
+            while( '\0' != fmt[len] && '%' != fmt[len] )
+                ++len;
+            ostrm( o, fmt, len );
+            rslt += len;
+            fmt += len;
             continue;
         }
+        ++fmt;
 
         int flag;
         fmt += getflag( &flag, fmt );
