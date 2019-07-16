@@ -1,30 +1,48 @@
 
 CC = gcc
-CFLAGS = -g -O2 -std=gnu99 -Wall
+CFLAGS = -g -O2 -std=gnu99 -Wall -MMD
 
-src  = $(wildcard *.c)
-src += $(wildcard ../*.c)
-obj = $(src:.c=.o)
+build_dir = build
+
+test_src_dir = .
+test_obj_dir = $(build_dir)/test
+
+module_src_dir = ..
+module_obj_dir = $(build_dir)/module
+
+test_src  = $(wildcard $(test_src_dir)/*.c)
+test_obj  = $(patsubst $(test_src_dir)/%.c,$(test_obj_dir)/%.o,$(test_src))
+
+module_src  = $(wildcard $(module_src_dir)/*.c)
+module_obj  = $(patsubst $(module_src_dir)/%.c,$(module_obj_dir)/%.o,$(module_src))
+
+src = $(test_src) $(module_src)
+obj = $(test_obj) $(module_obj)
 dep = $(obj:.o=.d)
 
 .PHONY: build all clean
 
-build: xprintf-test
+build: $(build_dir)/module-test
 
 all: clean build
 
-clean::
-	rm -rf *.d $(dep)
-	rm -rf *.o $(obj)
-	rm -rf xprintf-test
+clean:
+	rm -rf $(dep)
+	rm -rf $(obj)
+	rm -rf $(build_dir)/module-test
 
-test: xprintf-test
-	./xprintf-test
+test: $(build_dir)/module-test
+	$(build_dir)/module-test
 
-xprintf-test: $(obj)
-	gcc $(CFLAGS) -o $@ $^
+$(build_dir)/module-test: $(obj)
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(test_obj_dir)/%.o: $(test_src_dir)/%.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(module_obj_dir)/%.o: $(module_src_dir)/%.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 -include $(dep)
-
-%.d: %.c
-	$(CC) $(CFLAGS) $< -MM -MT $(@:.d=.o) >$@
