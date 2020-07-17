@@ -11,7 +11,7 @@ The main feature of xprintf is that it lets you __print in user defined output s
 * It has a __low stack usage__ profile. It is suitable for multi-thread systems.
 * Supports several compilation options to reduce program memory by eliminating features.
 
-# Example
+# Example 
 
 We have a queue module with this interface:
 
